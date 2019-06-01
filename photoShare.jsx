@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import { HashRouter, Route, Switch, Redirect } from "react-router-dom";
 import { Grid, Typography, Paper } from "@material-ui/core";
 import "./styles/main.css";
+import axios from "axios";
 
 // import necessary components
 import TopBar from "./components/topBar/TopBar";
@@ -18,10 +19,21 @@ class PhotoShare extends React.Component {
     this.state = {
       message: "",
       name: "",
-      userIsLoggedIn: true
+      userIsLoggedIn: false
     };
     this.topBarChange = this.topBarChange.bind(this);
     this.nameChange = this.nameChange.bind(this);
+  }
+
+  componentDidMount() {
+    axios.get("/user/list").then(
+      val => {
+        this.setState({ userIsLoggedIn: true });
+      },
+      err => {
+        this.setState({ userIsLoggedIn: false });
+      }
+    );
   }
 
   topBarChange(newMsg) {
@@ -33,6 +45,7 @@ class PhotoShare extends React.Component {
   }
 
   render() {
+    console.log(this.state.userIsLoggedIn);
     return (
       <HashRouter>
         <div>
@@ -52,11 +65,6 @@ class PhotoShare extends React.Component {
             <Grid item sm={9}>
               <Paper className="cs142-main-grid-item">
                 <Switch>
-                  {this.state.userIsLoggedIn ? (
-                    <Route exact path="/" />
-                  ) : (
-                    <Redirect path="/users/:id" to="/login-register" />
-                  )}
                   {this.state.userIsLoggedIn ? (
                     <Route
                       path="/users/:userId"
@@ -83,7 +91,7 @@ class PhotoShare extends React.Component {
                       )}
                     />
                   ) : (
-                    <Redirect path="/users/:id" to="/login-register" />
+                    <Redirect path="/photos/:userId" to="/login-register" />
                   )}
 
                   <Route
@@ -94,7 +102,7 @@ class PhotoShare extends React.Component {
                   {this.state.userIsLoggedIn ? (
                     <Route path="/users" component={UserList} />
                   ) : (
-                    <Redirect path="/users/:id" to="/login-register" />
+                    <Redirect path="/users" to="/login-register" />
                   )}
                 </Switch>
               </Paper>

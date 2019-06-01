@@ -356,11 +356,11 @@ app.post("/user", function(request, response) {
     //console.log("in the first if statement");
     User.findOne({ login_name: request.body.login_name })
       .then(result => {
-        console.log(result);
+        // console.log(result);
         if (result === null) {
           throw new Error("can't find user");
         }
-        console.log("found a user");
+        // console.log("found a user");
         response.status(400).send("user already exists");
       })
       .catch(err => {
@@ -370,7 +370,7 @@ app.post("/user", function(request, response) {
           request.body.last_name !== "" &&
           request.body.password !== ""
         ) {
-          console.log("got into if statement");
+          // console.log("got into if statement");
           User.create({
             first_name: request.body.first_name,
             last_name: request.body.last_name,
@@ -386,11 +386,11 @@ app.post("/user", function(request, response) {
               response.status(200).send("user saved");
             })
             .catch(result => {
-              console.log("in catch statement");
+              // console.log("in catch statement");
               response.status(400).send("cannot create user");
             });
         } else {
-          console.log("empty something");
+          // console.log("empty something");
           response.status(400).send("empty string");
         }
       });

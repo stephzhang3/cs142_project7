@@ -13,7 +13,7 @@ class LoginRegister extends React.Component {
   componentDidMount() {}
 
   render() {
-    return <div />;
+    return <div> not logged in </div>;
   }
 }
 
