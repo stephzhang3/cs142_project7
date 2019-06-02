@@ -12,7 +12,8 @@ class LoginRegister extends React.Component {
       login_name: "",
       password: "",
       user: {},
-      incorrectLogin: false
+      error_login: "",
+      error: ""
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -24,7 +25,50 @@ class LoginRegister extends React.Component {
     this.setState({ [event.target.name]: event.target.value });
   }
 
-  handleNewUser(event) {}
+  handleNewUser(event) {
+    event.preventDefault();
+    if (this.state.new_password === this.state.new_password2) {
+      if (
+        this.state.first_name &&
+        this.state.last_name &&
+        this.state.location &&
+        this.state.description &&
+        this.state.occupation &&
+        this.state.new_login_name &&
+        this.state.new_password &&
+        this.state.new_password2
+      ) {
+        axios
+          .post("/user", {
+            first_name: this.state.first_name,
+            last_name: this.state.last_name,
+            location: this.state.location,
+            description: this.state.description,
+            occupation: this.state.occupation,
+            login_name: this.state.new_login_name,
+            password: this.state.new_password
+          })
+          .then(
+            result => {
+              this.setState({
+                error: "User successfully created!"
+              });
+            },
+            err => {
+              this.setState({
+                error: err.response.data
+              });
+            }
+          );
+      } else {
+        this.setState({ error: "Please fill in all of the input fields" });
+      }
+    } else {
+      this.setState({
+        error: "Please make sure both of the password fields match"
+      });
+    }
+  }
 
   handleSubmit(event) {
     console.log("A name was submitted: ", this.state);
@@ -41,7 +85,9 @@ class LoginRegister extends React.Component {
           this.props.changeLogIn(true);
         },
         err => {
-          this.setState({ incorrectLogin: true });
+          this.setState({
+            error_login: "Incorrect login or password. Please try again"
+          });
           console.error("fetchModel error: ", err);
         }
       );
@@ -50,6 +96,7 @@ class LoginRegister extends React.Component {
   componentDidMount() {}
 
   render() {
+    console.log(this.state);
     return (
       <div>
         <div>
@@ -85,10 +132,11 @@ class LoginRegister extends React.Component {
                 Submit
               </Button>
             </div>
-            <Typography variant="subtitle2" color="inherit">
-              {this.state.incorrectLogin &&
-                "Incorrect login or password. Please try again"}
-            </Typography>
+            {this.state.error_login && (
+              <Typography variant="subtitle2" color="inherit">
+                {this.state.error_login}
+              </Typography>
+            )}
           </form>
         </div>
         <div>
@@ -99,7 +147,7 @@ class LoginRegister extends React.Component {
             <div>
               <TextField
                 type="text"
-                name="login_name"
+                name="new_login_name"
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
@@ -107,7 +155,7 @@ class LoginRegister extends React.Component {
               />
               <TextField
                 type="password"
-                name="password"
+                name="new_password"
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
@@ -115,7 +163,7 @@ class LoginRegister extends React.Component {
               />
               <TextField
                 type="password"
-                name="password2"
+                name="new_password2"
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
@@ -169,6 +217,11 @@ class LoginRegister extends React.Component {
               >
                 Register Me
               </Button>
+              {this.state.error && (
+                <Typography variant="subtitle2" color="inherit">
+                  {this.state.error}
+                </Typography>
+              )}
             </div>
           </form>
         </div>
