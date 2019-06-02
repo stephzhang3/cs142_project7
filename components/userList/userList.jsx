@@ -41,7 +41,7 @@ class UserList extends React.Component {
         <Typography variant="title">List of Users</Typography>
         <List component="nav">
           {this.state.usersArray.map(currUser => {
-            let link = "/users/".concat(currUser._id);
+            let link = "/users/" + currUser._id;
             return (
               <div key={currUser.first_name}>
                 <ListItem button component={RouterLink} to={link}>

@@ -104,7 +104,7 @@ app.get("/test/:p1", function(request, response) {
       }
 
       // We got the object - return it in JSON format.
-      console.log("SchemaInfo", info[0]);
+      //console.log("SchemaInfo", info[0]);
       response.end(JSON.stringify(info[0]));
     });
   } else if (param === "counts") {
@@ -285,8 +285,11 @@ app.post("/commentsOfPhoto/:photo_id", function(request, response) {
 4) save the photo
 
   */
+  console.log("in comments:", request.body.comment);
+  console.log("userid", request.session.user_id);
   if (request.body.comment === "") {
     response.status(400).send("cannot send an empty comment");
+    return;
   }
   var photo_id = request.params.photo_id;
   Photo.findOne({ _id: photo_id }, "comments")
@@ -296,6 +299,9 @@ app.post("/commentsOfPhoto/:photo_id", function(request, response) {
         date_time: Date.now(), // The date and time when the comment was created.
         user_id: request.session.user_id
       };
+      console.log("in findphoto", comment.user_id);
+      console.log("in findphoto", comment.comment);
+
       if (photo.comments.length) {
         photo.comments = photo.comments.concat([comment]);
       } else {

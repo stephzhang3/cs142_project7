@@ -13,7 +13,36 @@ class TopBar extends React.Component {
     this.state = {
       versionNumber: ""
     };
+    this.buttonClicked = this.buttonClicked.bind(this);
+    this.handleUploadButtonClicked = this.handleUploadButtonClicked.bind(this);
   }
+
+  buttonClicked(event) {
+    axios.post("/admin/logout", {}).then(
+      val => {
+        this.props.changeLogIn(false);
+        //this.setState({ user: val });
+      },
+      err => {
+        console.error("button clicked error:", err);
+      }
+    );
+  }
+
+  handleUploadButtonClicked = e => {
+    e.preventDefault();
+    if (this.uploadInput.files.length > 0) {
+      // Create a DOM form and add the file to it under the name uploadedphoto
+      const domForm = new FormData();
+      domForm.append("uploadedphoto", this.uploadInput.files[0]);
+      axios
+        .post("/photos/new", domForm)
+        .then(res => {
+          console.log(res);
+        })
+        .catch(err => console.log(`POST ERR: ${err}`));
+    }
+  };
 
   componentDidMount() {
     axios.get("test/info").then(
@@ -45,14 +74,34 @@ class TopBar extends React.Component {
             variant="h5"
             color="inherit"
           >
-            {this.props.login ? "Hello first name" : ""}
+            {this.props.login ? "Hello " + this.props.name : "Please log in"}
           </Typography>
-          {this.props.login ? (
-            <Button variant="outlined" color="secondary">
+          {this.props.login && (
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={this.buttonClicked}
+            >
               Log out
             </Button>
-          ) : (
-            ""
+          )}
+          {this.props.login && (
+            <input
+              type="file"
+              accept="image/*"
+              ref={domFileRef => {
+                this.uploadInput = domFileRef;
+              }}
+            />
+          )}
+          {this.props.login && (
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={this.handleUploadButtonClicked}
+            >
+              Submit photo
+            </Button>
           )}
           <Typography
             className="cs142-topbar-message"

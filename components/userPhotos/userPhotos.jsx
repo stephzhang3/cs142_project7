@@ -5,6 +5,8 @@ import React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import Link from "@material-ui/core/Link";
 import axios from "axios";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
 
 /**
  * Define UserPhotos, a React componment of CS142 project #5
@@ -12,10 +14,39 @@ import axios from "axios";
 class UserPhotos extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {
-      userPhotos: []
+      userPhotos: [],
+      comment: ""
     };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleSubmit(photo, event) {
+    console.log("photo: ", photo);
+    console.log("event: ", this.state.comment);
+    axios
+      .post("/commentsOfPhoto/" + photo._id, {
+        comment: this.state.comment
+      })
+      .then(result => {
+        //this.forceUpdate();
+        console.log("comment done from server", result);
+        this.setState({ comment: "" });
+        axios.get("/photosOfUser/" + this.props.match.params.userId).then(
+          val => {
+            this.setState({ userPhotos: val.data });
+          },
+          err => {
+            console.error("fetchModel error: ", err);
+          }
+        );
+      });
+  }
+
+  handleChange(event) {
+    this.setState({ comment: event.target.value });
   }
 
   componentDidMount() {
@@ -41,23 +72,53 @@ class UserPhotos extends React.Component {
               <div>
                 <Typography variant="subheading">Comments:</Typography>
                 <List>
-                  {photo.comments.map(comment => (
-                    <div key={comment._id}>
-                      <Link
-                        variant="subheading"
-                        component={RouterLink}
-                        to={"/users/".concat(comment.user._id)}
-                      >
-                        {comment.user.first_name}
-                      </Link>
-                      <ListItem>
-                        <ListItemText primary={comment.date_time} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary={comment.comment} />
-                      </ListItem>
-                    </div>
-                  ))}
+                  {photo.comments.map(comment => {
+                    return (
+                      <div key={comment._id}>
+                        <Link
+                          variant="subheading"
+                          component={RouterLink}
+                          to={"/users/" + comment.user._id}
+                        >
+                          {comment.user.first_name}
+                        </Link>
+                        <ListItem>
+                          <ListItemText primary={comment.date_time} />
+                        </ListItem>
+                        <ListItem>
+                          <ListItemText primary={comment.comment} />
+                        </ListItem>
+                      </div>
+                    );
+                  })}
+                  <TextField
+                    id="outlined-multiline-flexible"
+                    label="New Comment"
+                    multiline
+                    rowsMax="4"
+                    // value={"I AM"}
+                    value={this.state.comment}
+                    //value={values.multiline}
+                    onChange={e => {
+                      e.persist();
+                      this.handleChange(e);
+                    }}
+                    //className={classes.textField}
+                    margin="normal"
+                    variant="outlined"
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    label="Submit"
+                    type="submit"
+                    onClick={e => {
+                      e.persist();
+                      this.handleSubmit(photo, e);
+                    }}
+                  >
+                    Submit
+                  </Button>
                 </List>
               </div>
             )}
