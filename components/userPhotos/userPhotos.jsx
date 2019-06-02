@@ -23,7 +23,7 @@ class UserPhotos extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleSubmit(photo, event) {
+  handleSubmit(photo) {
     console.log("photo: ", photo);
     console.log("event: ", this.state.comment);
     axios
@@ -96,14 +96,11 @@ class UserPhotos extends React.Component {
                     label="New Comment"
                     multiline
                     rowsMax="4"
-                    // value={"I AM"}
                     value={this.state.comment}
-                    //value={values.multiline}
                     onChange={e => {
                       e.persist();
                       this.handleChange(e);
                     }}
-                    //className={classes.textField}
                     margin="normal"
                     variant="outlined"
                   />

@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { HashRouter, Route, Switch, Redirect } from "react-router-dom";
-import { Grid, Typography, Paper } from "@material-ui/core";
+import { Grid, Paper } from "@material-ui/core";
 import "./styles/main.css";
 import axios from "axios";
 
@@ -30,10 +30,10 @@ class PhotoShare extends React.Component {
 
   componentDidMount() {
     axios.get("/user/list").then(
-      val => {
+      () => {
         this.setState({ userIsLoggedIn: true });
       },
-      err => {
+      () => {
         this.setState({ userIsLoggedIn: false });
       }
     );
@@ -118,7 +118,7 @@ class PhotoShare extends React.Component {
 
                   <Route
                     path="/login-register"
-                    render={props => (
+                    render={() => (
                       <LoginRegister
                         changeUser={this.changeUser}
                         changeLogIn={this.changeLogIn}

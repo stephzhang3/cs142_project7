@@ -17,9 +17,9 @@ class TopBar extends React.Component {
     this.handleUploadButtonClicked = this.handleUploadButtonClicked.bind(this);
   }
 
-  buttonClicked(event) {
+  buttonClicked() {
     axios.post("/admin/logout", {}).then(
-      val => {
+      () => {
         this.props.changeLogIn(false);
         //this.setState({ user: val });
       },

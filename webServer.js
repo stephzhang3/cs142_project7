@@ -332,7 +332,7 @@ app.post("/photos/new", function(request, response) {
     var timestamp = new Date().valueOf();
     var filename = "U" + String(timestamp) + request.file.originalname;
 
-    fs.writeFile("./images/" + filename, request.file.buffer, function(err) {
+    fs.writeFile("./images/" + filename, request.file.buffer, function() {
       // XXX - Once you have the file written into your images directory under the name
       // filename you can create the Photo object in the database
       Photo.create(
@@ -342,7 +342,7 @@ app.post("/photos/new", function(request, response) {
           user_id: request.session.user_id,
           comments: []
         },
-        function(err) {
+        err => {
           if (err) {
             response.status(400).send(JSON.stringify(err));
           } else {
@@ -369,7 +369,7 @@ app.post("/user", function(request, response) {
         // console.log("found a user");
         response.status(400).send("user already exists");
       })
-      .catch(err => {
+      .catch(() => {
         console.log("couldn't find user");
         if (
           request.body.first_name !== "" &&
@@ -387,11 +387,11 @@ app.post("/user", function(request, response) {
             password: request.body.password
           })
             .then(result => {
-              console.log("created user", result._id);
+              //console.log("created user", result._id);
               result.save();
               response.status(200).send("user saved");
             })
-            .catch(result => {
+            .catch(() => {
               // console.log("in catch statement");
               response.status(400).send("cannot create user");
             });

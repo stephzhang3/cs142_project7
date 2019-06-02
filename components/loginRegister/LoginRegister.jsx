@@ -1,5 +1,5 @@
 import React from "react";
-import { AppBar, Toolbar, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import axios from "axios";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
@@ -49,7 +49,7 @@ class LoginRegister extends React.Component {
             password: this.state.new_password
           })
           .then(
-            result => {
+            () => {
               this.setState({
                 error: "User successfully created!",
                 first_name: "",
@@ -114,7 +114,6 @@ class LoginRegister extends React.Component {
           <form onSubmit={this.handleSubmit}>
             <div>
               <TextField
-                className="text"
                 type="login name"
                 name="login_name"
                 onChange={this.handleChange}
