@@ -51,7 +51,15 @@ class LoginRegister extends React.Component {
           .then(
             result => {
               this.setState({
-                error: "User successfully created!"
+                error: "User successfully created!",
+                first_name: "",
+                last_name: "",
+                location: "",
+                description: "",
+                occupation: "",
+                new_login_name: "",
+                new_password: "",
+                new_password2: ""
               });
             },
             err => {
@@ -148,6 +156,7 @@ class LoginRegister extends React.Component {
               <TextField
                 type="text"
                 name="new_login_name"
+                value={this.state.new_login_name || ""}
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
@@ -156,6 +165,7 @@ class LoginRegister extends React.Component {
               <TextField
                 type="password"
                 name="new_password"
+                value={this.state.new_password || ""}
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
@@ -164,6 +174,7 @@ class LoginRegister extends React.Component {
               <TextField
                 type="password"
                 name="new_password2"
+                value={this.state.new_password2 || ""}
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
@@ -172,6 +183,7 @@ class LoginRegister extends React.Component {
               <TextField
                 type="text"
                 name="first_name"
+                value={this.state.first_name || ""}
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
@@ -180,6 +192,7 @@ class LoginRegister extends React.Component {
               <TextField
                 type="text"
                 name="last_name"
+                value={this.state.last_name || ""}
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
@@ -188,6 +201,7 @@ class LoginRegister extends React.Component {
               <TextField
                 type="text"
                 name="location"
+                value={this.state.location || ""}
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
@@ -196,6 +210,7 @@ class LoginRegister extends React.Component {
               <TextField
                 type="text"
                 name="description"
+                value={this.state.description || ""}
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
@@ -204,6 +219,7 @@ class LoginRegister extends React.Component {
               <TextField
                 type="text"
                 name="occupation"
+                value={this.state.occupation || ""}
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
