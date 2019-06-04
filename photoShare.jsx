@@ -20,12 +20,14 @@ class PhotoShare extends React.Component {
       message: "",
       name: "",
       userIsLoggedIn: false,
-      user: {}
+      user: {},
+      users: []
     };
     this.topBarChange = this.topBarChange.bind(this);
     this.nameChange = this.nameChange.bind(this);
     this.changeLogIn = this.changeLogIn.bind(this);
     this.changeUser = this.changeUser.bind(this);
+    this.getUsers = this.getUsers.bind(this);
   }
 
   componentDidMount() {
@@ -55,9 +57,14 @@ class PhotoShare extends React.Component {
     this.setState({ user: user });
   }
 
+  getUsers(users) {
+    this.setState({ users: users });
+  }
+
   render() {
-    console.log(this.state.userIsLoggedIn);
-    console.log("photoshare user", this.state.user);
+    //console.log(this.state.userIsLoggedIn);
+    //console.log("photoshare user", this.state.user);
+    console.log("users", this.state.users);
     return (
       <HashRouter>
         <div>
@@ -74,7 +81,10 @@ class PhotoShare extends React.Component {
             <Grid item sm={3}>
               <Paper className="cs142-main-grid-item">
                 {this.state.userIsLoggedIn && (
-                  <UserList changeMessage={this.topBarChange} />
+                  <UserList
+                    changeMessage={this.topBarChange}
+                    setUsers={this.getUsers}
+                  />
                 )}
               </Paper>
             </Grid>
@@ -103,6 +113,7 @@ class PhotoShare extends React.Component {
                           {...props}
                           changeMessage={this.topBarChange}
                           name={this.state.message}
+                          users={this.state.users}
                         />
                       )}
                     />

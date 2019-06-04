@@ -166,7 +166,10 @@ app.get("/user/list", function(request, response) {
 app.get("/user/:id", function(request, response) {
   if (request.session.login_name && request.session.user_id) {
     var id = request.params.id;
-    User.findById(id, "first_name last_name id location description occupation")
+    User.findById(
+      id,
+      "first_name last_name id location description occupation mentions"
+    )
       .then(result => {
         response.status(200).send(JSON.parse(JSON.stringify(result)));
       })
@@ -299,8 +302,8 @@ app.post("/commentsOfPhoto/:photo_id", function(request, response) {
         date_time: Date.now(), // The date and time when the comment was created.
         user_id: request.session.user_id
       };
-      console.log("in findphoto", comment.user_id);
-      console.log("in findphoto", comment.comment);
+      // console.log("in findphoto", comment.user_id);
+      // console.log("in findphoto", comment.comment);
 
       if (photo.comments.length) {
         photo.comments = photo.comments.concat([comment]);
@@ -401,6 +404,50 @@ app.post("/user", function(request, response) {
         }
       });
   }
+});
+
+app.post("/mentionsOfPhoto/:photo_id", function(request, response) {
+  let user = request.body.mentionUser;
+  let photo = request.params.photo_id;
+  // console.log("in mentions backend user", user);
+  // console.log("in mentions backend photo", photo);
+
+  User.findById(user, "mentions")
+    .then(user => {
+      console.log(user);
+      if (user.mentions.length) {
+        user.mentions = user.mentions.concat([photo]);
+      } else {
+        user.mentions = [photo];
+      }
+      user
+        .save()
+        .then(result => {
+          console.log("user saved", user);
+          response.status(200).send("mention saved");
+        })
+        .catch(err => response.status(400).send(JSON.stringify(err)));
+    })
+    .catch(err => response.status(400).send(JSON.stringify(err)));
+});
+
+app.get("/getPhoto/:photo_id", function(request, response) {
+  let photo_id = request.params.photo_id;
+  console.log("in mentions backend photo", photo_id);
+
+  Photo.findById(photo_id, "file_name user_id")
+    .then(photo => {
+      photo = JSON.parse(JSON.stringify(photo));
+      User.findById(photo.user_id, "first_name last_name")
+        .then(user => {
+          photo.first_name = user.first_name;
+          photo.last_name = user.last_name;
+          console.log("PHOTO", photo);
+          response.status(200).send(JSON.stringify(photo));
+        })
+        .catch(err => {});
+    })
+    .catch(err => response.status(400).send(JSON.stringify(err)));
 });
 
 var server = app.listen(3000, function() {

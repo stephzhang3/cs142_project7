@@ -27,6 +27,7 @@ class UserList extends React.Component {
     this.props.changeMessage("Home");
     axios.get("/user/list").then(
       val => {
+        this.props.setUsers(val.data);
         this.setState({ usersArray: val.data });
       },
       err => {

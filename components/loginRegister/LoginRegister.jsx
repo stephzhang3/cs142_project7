@@ -79,7 +79,7 @@ class LoginRegister extends React.Component {
   }
 
   handleSubmit(event) {
-    console.log("A name was submitted: ", this.state);
+    //console.log("A name was submitted: ", this.state);
     event.preventDefault();
     axios
       .post("/admin/login", {
@@ -104,7 +104,7 @@ class LoginRegister extends React.Component {
   componentDidMount() {}
 
   render() {
-    console.log(this.state);
+    //console.log(this.state);
     return (
       <div>
         <div>

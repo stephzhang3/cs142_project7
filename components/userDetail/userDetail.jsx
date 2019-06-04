@@ -15,7 +15,8 @@ class UserDetail extends React.Component {
     this.state = {
       usersArray: {
         first_name: ""
-      }
+      },
+      mentions: []
     };
   }
 
@@ -37,9 +38,29 @@ class UserDetail extends React.Component {
     if (this.props.match.params.userId !== prevProps.match.params.userId) {
       axios.get("/user/" + this.props.match.params.userId).then(
         val => {
-          this.setState({ usersArray: val.data }, () =>
-            this.props.changeMessage(this.state.usersArray.first_name)
-          );
+          this.setState({ usersArray: val.data }, () => {
+            this.props.changeMessage(this.state.usersArray.first_name);
+            if (this.state.usersArray.mentions.length) {
+              this.setState({
+                mentions: []
+              });
+              this.state.usersArray.mentions.forEach(mention => {
+                axios.get("/getPhoto/" + mention).then(
+                  val => {
+                    this.setState({
+                      mentions: this.state.mentions.concat(val.data)
+                    });
+                  },
+                  err => {
+                    console.error("fetchModel error: ", err);
+                  }
+                );
+              });
+            } else {
+              //console.log("im in the else statement");
+              this.setState({ mentions: [] });
+            }
+          });
         },
         err => {
           console.error("fetchModel error: ", err);
@@ -49,6 +70,7 @@ class UserDetail extends React.Component {
   }
 
   render() {
+    console.log("USER DETAILS", this.state.usersArray);
     return (
       <div>
         <List>
@@ -76,6 +98,19 @@ class UserDetail extends React.Component {
             <ListItemText
               primary={"Occupation: ".concat(this.state.usersArray.occupation)}
             />
+          </ListItem>
+          <ListItem>
+            <ListItemText primary={"Mentions: "} />
+            {this.state.mentions.length &&
+              this.state.mentions.map(currMention => (
+                <div key={currMention.file_name}>
+                  <ListItemText primary={currMention.first_name} />
+                  <img
+                    src={"/images/".concat(currMention.file_name)}
+                    alt={currMention.file_name}
+                  />
+                </div>
+              ))}
           </ListItem>
         </List>
         <Link
