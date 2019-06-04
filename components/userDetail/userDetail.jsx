@@ -4,6 +4,7 @@ import { List, ListItem, ListItemText } from "@material-ui/core";
 import { Link as RouterLink } from "react-router-dom";
 import Link from "@material-ui/core/Link";
 //import fetchModel from "../../lib/fetchModelData";
+import Mentions from "./Mentions";
 import axios from "axios";
 
 /**
@@ -13,7 +14,7 @@ class UserDetail extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      usersArray: {
+      userObj: {
         first_name: ""
       },
       mentions: []
@@ -23,8 +24,8 @@ class UserDetail extends React.Component {
   componentDidMount() {
     axios.get("/user/" + this.props.match.params.userId).then(
       val => {
-        this.setState({ usersArray: val.data }, () =>
-          this.props.changeMessage(this.state.usersArray.first_name)
+        this.setState({ userObj: val.data }, () =>
+          this.props.changeMessage(this.state.userObj.first_name)
         );
       },
       err => {
@@ -38,13 +39,16 @@ class UserDetail extends React.Component {
     if (this.props.match.params.userId !== prevProps.match.params.userId) {
       axios.get("/user/" + this.props.match.params.userId).then(
         val => {
-          this.setState({ usersArray: val.data }, () => {
-            this.props.changeMessage(this.state.usersArray.first_name);
-            if (this.state.usersArray.mentions.length) {
-              this.setState({
-                mentions: []
-              });
-              this.state.usersArray.mentions.forEach(mention => {
+          // if it gets the user, then it sets the user in the state
+          this.setState({ userObj: val.data }, () => {
+            this.props.changeMessage(this.state.userObj.first_name);
+            //checks to see if the user has any mentions, if so sets the mentions photo object in the mentions array
+            this.setState({
+              mentions: []
+            });
+            if (this.state.userObj.mentions.length) {
+              //loops through each photo id in the mentions array and populates the mentions array with the photo object
+              this.state.userObj.mentions.forEach(mention => {
                 axios.get("/getPhoto/" + mention).then(
                   val => {
                     this.setState({
@@ -56,9 +60,6 @@ class UserDetail extends React.Component {
                   }
                 );
               });
-            } else {
-              //console.log("im in the else statement");
-              this.setState({ mentions: [] });
             }
           });
         },
@@ -70,55 +71,44 @@ class UserDetail extends React.Component {
   }
 
   render() {
-    console.log("USER DETAILS", this.state.usersArray);
+    console.log("USER DETAILS", this.state.userObj);
     return (
       <div>
         <List>
           <ListItem>
             <ListItemText
-              primary={this.state.usersArray.first_name.concat(
+              primary={this.state.userObj.first_name.concat(
                 " ",
-                this.state.usersArray.last_name
+                this.state.userObj.last_name
               )}
             />
           </ListItem>
           <ListItem>
             <ListItemText
-              primary={"Location: ".concat(this.state.usersArray.location)}
+              primary={"Location: ".concat(this.state.userObj.location)}
             />
           </ListItem>
           <ListItem>
             <ListItemText
-              primary={"Description: ".concat(
-                this.state.usersArray.description
-              )}
+              primary={"Description: ".concat(this.state.userObj.description)}
             />
           </ListItem>
           <ListItem>
             <ListItemText
-              primary={"Occupation: ".concat(this.state.usersArray.occupation)}
+              primary={"Occupation: ".concat(this.state.userObj.occupation)}
             />
           </ListItem>
           <ListItem>
             <ListItemText primary={"Mentions: "} />
-            {this.state.mentions.length &&
-              this.state.mentions.map(currMention => (
-                <div key={currMention.file_name}>
-                  <ListItemText primary={currMention.first_name} />
-                  <img
-                    src={"/images/".concat(currMention.file_name)}
-                    alt={currMention.file_name}
-                  />
-                </div>
-              ))}
+            <Mentions mentions={this.state.mentions} />
           </ListItem>
         </List>
         <Link
           variant="subheading"
           component={RouterLink}
-          to={"/photos/".concat(this.state.usersArray._id)}
+          to={"/photos/".concat(this.state.userObj._id)}
         >
-          Photos of {this.state.usersArray.first_name}
+          Photos of {this.state.userObj.first_name}
         </Link>
       </div>
     );

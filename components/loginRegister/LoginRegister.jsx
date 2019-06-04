@@ -9,8 +9,8 @@ class LoginRegister extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      login_name: "",
-      password: "",
+      login_name: "took",
+      password: "weak",
       user: {},
       error_login: "",
       error: ""
@@ -116,6 +116,7 @@ class LoginRegister extends React.Component {
               <TextField
                 type="login name"
                 name="login_name"
+                value={this.state.login_name}
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
@@ -125,6 +126,7 @@ class LoginRegister extends React.Component {
                 type="password"
                 className="text"
                 name="password"
+                value={this.state.password}
                 onChange={this.handleChange}
                 margin="normal"
                 variant="outlined"
