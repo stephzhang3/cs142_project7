@@ -148,7 +148,7 @@ app.get("/test/:p1", function(request, response) {
  */
 app.get("/user/list", function(request, response) {
   if (request.session.login_name && request.session.user_id) {
-    User.find({}, "first_name last_name id", function(err, users) {
+    User.find({}, "first_name last_name id lastAction", function(err, users) {
       if (err) {
         response.status(500).send(JSON.stringify(err));
         return;
@@ -252,12 +252,14 @@ app.post("/admin/login", function(request, response) {
   var id = request.body.login_name;
   User.findOne(
     { login_name: id },
-    "first_name last_name id location description occupation login_name password"
+    "first_name last_name id location description occupation login_name password lastAction"
   )
     .then(result => {
       if (result.password === request.body.password) {
         request.session.user_id = result.id;
         request.session.login_name = result.login_name;
+        result.lastAction = "Logged in";
+        result.save();
         response.status(200).send(JSON.parse(JSON.stringify(result)));
       } else response.status(400).send("wrong password");
     })
@@ -269,6 +271,16 @@ app.post("/admin/login", function(request, response) {
 
 app.post("/admin/logout", function(request, response) {
   if (request.session.login_name && request.session.user_id) {
+    User.findOne(
+      { login_name: request.session.login_name },
+      "first_name last_name id lastAction"
+    )
+      .then(result => {
+        //console.log("logout", result);
+        result.lastAction = "Logged out";
+        result.save();
+      })
+      .catch(err => response.status(400).send(JSON.stringify(err)));
     delete request.session["login_name"];
     delete request.session["user_id"];
     request.session.destroy(function(err) {
@@ -288,12 +300,22 @@ app.post("/commentsOfPhoto/:photo_id", function(request, response) {
 4) save the photo
 
   */
-  console.log("in comments:", request.body.comment);
-  console.log("userid", request.session.user_id);
+  // console.log("in comments:", request.body.comment);
+  // console.log("userid", request.session.user_id);
   if (request.body.comment === "") {
     response.status(400).send("cannot send an empty comment");
     return;
   }
+  User.findOne(
+    { login_name: request.session.login_name },
+    "first_name last_name id lastAction"
+  )
+    .then(result => {
+      //console.log("logout", result);
+      result.lastAction = "Added a comment";
+      result.save();
+    })
+    .catch(err => response.status(400).send(JSON.stringify(err)));
   var photo_id = request.params.photo_id;
   Photo.findOne({ _id: photo_id }, "comments")
     .then(photo => {
@@ -322,6 +344,17 @@ app.post("/photos/new", function(request, response) {
       response.status(400).send(JSON.stringify(err));
       return;
     }
+
+    User.findOne(
+      { login_name: request.session.login_name },
+      "first_name last_name id lastAction"
+    )
+      .then(result => {
+        //console.log("logout", result);
+        result.lastAction = "Added a photo";
+        result.save();
+      })
+      .catch(err => response.status(400).send(JSON.stringify(err)));
     // request.file has the following properties of interest
     //      fieldname      - Should be 'uploadedphoto' since that is what we sent
     //      originalname:  - The name of the file the user uploaded
@@ -387,7 +420,8 @@ app.post("/user", function(request, response) {
             description: request.body.description,
             occupation: request.body.occupation,
             login_name: request.body.login_name,
-            password: request.body.password
+            password: request.body.password,
+            lastAction: "Registered as a user"
           })
             .then(result => {
               //console.log("created user", result._id);
@@ -448,6 +482,71 @@ app.get("/getPhoto/:photo_id", function(request, response) {
         .catch(err => {});
     })
     .catch(err => response.status(400).send(JSON.stringify(err)));
+});
+
+app.get("/getTopUserPhoto/:id", function(request, response) {
+  if (request.session.login_name && request.session.user_id) {
+    let id = request.params.id;
+    //console.log("in mentions backend photo", photo_id);
+
+    Photo.find(
+      { user_id: id },
+      "_id user_id comments file_name date_time"
+    ).then(
+      photos => {
+        let lastPhoto = photos[Object.keys(photos).length - 1];
+        //last photo is an object
+        response.status(200).send(JSON.stringify(lastPhoto));
+        //console.log(typeof lastPhoto);
+      },
+      err => {
+        if (err) {
+          response.status(400).send(JSON.stringify(err));
+        } else {
+          response.status(200).send(JSON.parse(JSON.stringify(photos)));
+        }
+      }
+    );
+  } else {
+    response.status(401).send("You are not logged in");
+  }
+});
+
+app.get("/getTopComment/:id", function(request, response) {
+  if (request.session.login_name && request.session.user_id) {
+    let id = request.params.id;
+    Photo.find(
+      { user_id: id },
+      "_id user_id comments file_name date_time"
+    ).then(
+      photos => {
+        let topPhoto = photos[Object.keys(photos)[0]];
+        let numComments = 0;
+        Object.keys(photos).forEach(function(currKey) {
+          let currPhoto = photos[currKey];
+          if (currPhoto.comments.length > numComments) {
+            topPhoto = currPhoto;
+            numComments = currPhoto.comments.length;
+            console.log("top photo", currPhoto.file_name);
+          }
+        });
+        if (numComments === 0) {
+          response.status(200).send(JSON.stringify({}));
+        } else {
+          response.status(200).send(JSON.stringify(topPhoto));
+        }
+      },
+      err => {
+        if (err) {
+          response.status(400).send(JSON.stringify(err));
+        } else {
+          response.status(200).send(JSON.parse(JSON.stringify(photos)));
+        }
+      }
+    );
+  } else {
+    response.status(401).send("You are not logged in");
+  }
 });
 
 var server = app.listen(3000, function() {

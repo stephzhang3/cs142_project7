@@ -99,6 +99,7 @@ class PhotoShare extends React.Component {
                           {...props}
                           changeMessage={this.topBarChange}
                           changeName={this.nameChange}
+                          userId={props.match.params.userId}
                         />
                       )}
                     />

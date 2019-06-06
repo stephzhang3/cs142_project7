@@ -51,6 +51,7 @@ class UserList extends React.Component {
                       " ",
                       currUser.last_name
                     )}
+                    secondary={currUser.lastAction}
                   />
                 </ListItem>
                 <Divider />
