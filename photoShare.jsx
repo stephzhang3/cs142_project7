@@ -83,6 +83,7 @@ class PhotoShare extends React.Component {
                 login={this.state.userIsLoggedIn}
                 changeLogIn={this.changeLogIn}
                 name={this.state.user.first_name}
+                getUsers={this.getUserList}
               />
             </Grid>
             <div className="cs142-main-topbar-buffer" />
@@ -125,6 +126,7 @@ class PhotoShare extends React.Component {
                           changeMessage={this.topBarChange}
                           name={this.state.message}
                           users={this.state.users}
+                          getUsers={this.getUserList}
                         />
                       )}
                     />

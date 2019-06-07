@@ -38,6 +38,7 @@ class TopBar extends React.Component {
       axios
         .post("/photos/new", domForm)
         .then(res => {
+          this.props.getUsers();
           console.log(res);
         })
         .catch(err => console.log(`POST ERR: ${err}`));

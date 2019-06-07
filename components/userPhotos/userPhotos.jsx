@@ -94,6 +94,7 @@ class UserPhotos extends React.Component {
                     photo={photo}
                     photoChange={this.photoChange}
                     userId={this.props.match.params.userId}
+                    getUsers={this.props.getUsers}
                   />
                 </List>
               </div>

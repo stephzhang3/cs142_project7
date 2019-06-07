@@ -37,13 +37,39 @@ class UserList extends React.Component {
             return (
               <div key={currUser.first_name}>
                 <ListItem button component={RouterLink} to={link}>
-                  <ListItemText
-                    primary={currUser.first_name.concat(
-                      " ",
-                      currUser.last_name
-                    )}
-                    secondary={currUser.lastAction}
-                  />
+                  {currUser.lastAction && currUser.lastAction.includes(".") ? (
+                    <React.Fragment>
+                      <div>
+                        <ListItemText
+                          primary={currUser.first_name.concat(
+                            " ",
+                            currUser.last_name
+                          )}
+                        />{" "}
+                      </div>
+                      <div>
+                        <img
+                          id={currUser.lastAction}
+                          src={"/images/".concat(currUser.lastAction)}
+                          alt={currUser.lastAction}
+                          style={{
+                            height: "auto",
+                            width: "100px",
+                            display: "block",
+                            margin: "10px"
+                          }}
+                        />
+                      </div>
+                    </React.Fragment>
+                  ) : (
+                    <ListItemText
+                      primary={currUser.first_name.concat(
+                        " ",
+                        currUser.last_name
+                      )}
+                      secondary={currUser.lastAction}
+                    />
+                  )}
                 </ListItem>
                 <Divider />
               </div>

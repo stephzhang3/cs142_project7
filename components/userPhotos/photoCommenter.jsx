@@ -27,6 +27,7 @@ class PhotoCommenter extends React.Component {
         axios.get("/photosOfUser/" + this.props.userId).then(
           val => {
             this.props.photoChange(val.data);
+            this.props.getUsers();
             //this.setState({ userPhotos: val.data });
             //set mention here
           },
