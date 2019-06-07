@@ -28,15 +28,23 @@ class PhotoShare extends React.Component {
     this.changeLogIn = this.changeLogIn.bind(this);
     this.changeUser = this.changeUser.bind(this);
     this.getUsers = this.getUsers.bind(this);
+    this.getUserList = this.getUserList.bind(this);
   }
 
   componentDidMount() {
+    this.setState({ message: "Home" });
+    this.getUserList();
+  }
+
+  getUserList() {
     axios.get("/user/list").then(
-      () => {
-        this.setState({ userIsLoggedIn: true });
+      users => {
+        this.setState({ users: users.data, userIsLoggedIn: true });
+        //this.setState({ userIsLoggedIn: true });
       },
-      () => {
+      err => {
         this.setState({ userIsLoggedIn: false });
+        console.error("fetchModel error: ", err);
       }
     );
   }
@@ -84,6 +92,8 @@ class PhotoShare extends React.Component {
                   <UserList
                     changeMessage={this.topBarChange}
                     setUsers={this.getUsers}
+                    users={this.state.users}
+                    getUsers={this.getUserList}
                   />
                 )}
               </Paper>

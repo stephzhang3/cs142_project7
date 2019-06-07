@@ -293,195 +293,206 @@ app.post("/admin/logout", function(request, response) {
 });
 
 app.post("/commentsOfPhoto/:photo_id", function(request, response) {
-  /*
+  if (request.session.login_name && request.session.user_id) {
+    /*
 1) find the photo
 2) make a comment object with the comment and the user id of whoever posted the comment and the time
 3) attach that comment to the photo's comment Array
 4) save the photo
 
   */
-  // console.log("in comments:", request.body.comment);
-  // console.log("userid", request.session.user_id);
-  if (request.body.comment === "") {
-    response.status(400).send("cannot send an empty comment");
-    return;
-  }
-  User.findOne(
-    { login_name: request.session.login_name },
-    "first_name last_name id lastAction"
-  )
-    .then(result => {
-      //console.log("logout", result);
-      result.lastAction = "Added a comment";
-      result.save();
-    })
-    .catch(err => response.status(400).send(JSON.stringify(err)));
-  var photo_id = request.params.photo_id;
-  Photo.findOne({ _id: photo_id }, "comments")
-    .then(photo => {
-      let comment = {
-        comment: request.body.comment, // The text of the comment.
-        date_time: Date.now(), // The date and time when the comment was created.
-        user_id: request.session.user_id
-      };
-      // console.log("in findphoto", comment.user_id);
-      // console.log("in findphoto", comment.comment);
-
-      if (photo.comments.length) {
-        photo.comments = photo.comments.concat([comment]);
-      } else {
-        photo.comments = [comment];
-      }
-      photo.save();
-      response.status(200).send("comment saved");
-    })
-    .catch(err => response.status(400).send(JSON.stringify(err)));
-});
-
-app.post("/photos/new", function(request, response) {
-  processFormBody(request, response, function(err) {
-    if (err || !request.file) {
-      response.status(400).send(JSON.stringify(err));
+    // console.log("in comments:", request.body.comment);
+    // console.log("userid", request.session.user_id);
+    if (request.body.comment === "") {
+      response.status(400).send("cannot send an empty comment");
       return;
     }
-
     User.findOne(
       { login_name: request.session.login_name },
       "first_name last_name id lastAction"
     )
       .then(result => {
         //console.log("logout", result);
-        result.lastAction = "Added a photo";
+        result.lastAction = "Added a comment";
         result.save();
       })
       .catch(err => response.status(400).send(JSON.stringify(err)));
-    // request.file has the following properties of interest
-    //      fieldname      - Should be 'uploadedphoto' since that is what we sent
-    //      originalname:  - The name of the file the user uploaded
-    //      mimetype:      - The mimetype of the image (e.g. 'image/jpeg',  'image/png')
-    //      buffer:        - A node Buffer containing the contents of the file
-    //      size:          - The size of the file in bytes
+    var photo_id = request.params.photo_id;
+    Photo.findOne({ _id: photo_id }, "comments")
+      .then(photo => {
+        let comment = {
+          comment: request.body.comment, // The text of the comment.
+          date_time: Date.now(), // The date and time when the comment was created.
+          user_id: request.session.user_id
+        };
+        // console.log("in findphoto", comment.user_id);
+        // console.log("in findphoto", comment.comment);
 
-    // XXX - Do some validation here.
-    // We need to create the file in the directory "images" under an unique name. We make
-    // the original file name unique by adding a unique prefix with a timestamp.
-    var timestamp = new Date().valueOf();
-    var filename = "U" + String(timestamp) + request.file.originalname;
-
-    fs.writeFile("./images/" + filename, request.file.buffer, function() {
-      // XXX - Once you have the file written into your images directory under the name
-      // filename you can create the Photo object in the database
-      Photo.create(
-        {
-          file_name: filename,
-          date_time: timestamp,
-          user_id: request.session.user_id,
-          comments: []
-        },
-        err => {
-          if (err) {
-            response.status(400).send(JSON.stringify(err));
-          } else {
-            response.status(200).send("photo saved");
-          }
+        if (photo.comments.length) {
+          photo.comments = photo.comments.concat([comment]);
+        } else {
+          photo.comments = [comment];
         }
-      );
+        photo.save();
+        response.status(200).send("comment saved");
+      })
+      .catch(err => response.status(400).send(JSON.stringify(err)));
+  }
+});
+
+app.post("/photos/new", function(request, response) {
+  if (request.session.login_name && request.session.user_id) {
+    processFormBody(request, response, function(err) {
+      if (err || !request.file) {
+        response.status(400).send(JSON.stringify(err));
+        return;
+      }
+
+      // request.file has the following properties of interest
+      //      fieldname      - Should be 'uploadedphoto' since that is what we sent
+      //      originalname:  - The name of the file the user uploaded
+      //      mimetype:      - The mimetype of the image (e.g. 'image/jpeg',  'image/png')
+      //      buffer:        - A node Buffer containing the contents of the file
+      //      size:          - The size of the file in bytes
+
+      // XXX - Do some validation here.
+      // We need to create the file in the directory "images" under an unique name. We make
+      // the original file name unique by adding a unique prefix with a timestamp.
+      var timestamp = new Date().valueOf();
+      var filename = "U" + String(timestamp) + request.file.originalname;
+
+      User.findOne(
+        { login_name: request.session.login_name },
+        "first_name last_name id lastAction"
+      )
+        .then(result => {
+          //console.log("logout", result);
+          result.lastAction = filename;
+          result.save();
+        })
+        .catch(err => response.status(400).send(JSON.stringify(err)));
+
+      fs.writeFile("./images/" + filename, request.file.buffer, function() {
+        // XXX - Once you have the file written into your images directory under the name
+        // filename you can create the Photo object in the database
+        Photo.create(
+          {
+            file_name: filename,
+            date_time: timestamp,
+            user_id: request.session.user_id,
+            comments: []
+          },
+          err => {
+            if (err) {
+              response.status(400).send(JSON.stringify(err));
+            } else {
+              response.status(200).send("photo saved");
+            }
+          }
+        );
+      });
     });
-  });
+  }
 });
 
 app.post("/user", function(request, response) {
   //specified and doesn't already exist
   //first name, last name, and password must be non-empty strings
   //create user
-  if (request.body.login_name) {
-    //console.log("in the first if statement");
-    User.findOne({ login_name: request.body.login_name })
-      .then(result => {
-        // console.log(result);
-        if (result === null) {
-          throw new Error("can't find user");
-        }
-        // console.log("found a user");
-        response.status(400).send("user already exists");
-      })
-      .catch(() => {
-        console.log("couldn't find user");
-        if (
-          request.body.first_name !== "" &&
-          request.body.last_name !== "" &&
-          request.body.password !== ""
-        ) {
-          // console.log("got into if statement");
-          User.create({
-            first_name: request.body.first_name,
-            last_name: request.body.last_name,
-            location: request.body.location,
-            description: request.body.description,
-            occupation: request.body.occupation,
-            login_name: request.body.login_name,
-            password: request.body.password,
-            lastAction: "Registered as a user"
-          })
-            .then(result => {
-              //console.log("created user", result._id);
-              result.save();
-              response.status(200).send("user saved");
+  if (request.session.login_name && request.session.user_id) {
+    if (request.body.login_name) {
+      //console.log("in the first if statement");
+      User.findOne({ login_name: request.body.login_name })
+        .then(result => {
+          // console.log(result);
+          if (result === null) {
+            throw new Error("can't find user");
+          }
+          // console.log("found a user");
+          response.status(400).send("user already exists");
+        })
+        .catch(() => {
+          console.log("couldn't find user");
+          if (
+            request.body.first_name !== "" &&
+            request.body.last_name !== "" &&
+            request.body.password !== ""
+          ) {
+            // console.log("got into if statement");
+            User.create({
+              first_name: request.body.first_name,
+              last_name: request.body.last_name,
+              location: request.body.location,
+              description: request.body.description,
+              occupation: request.body.occupation,
+              login_name: request.body.login_name,
+              password: request.body.password,
+              lastAction: "Registered as a user"
             })
-            .catch(() => {
-              // console.log("in catch statement");
-              response.status(400).send("cannot create user");
-            });
-        } else {
-          // console.log("empty something");
-          response.status(400).send("empty string");
-        }
-      });
+              .then(result => {
+                //console.log("created user", result._id);
+                result.save();
+                response.status(200).send("user saved");
+              })
+              .catch(() => {
+                // console.log("in catch statement");
+                response.status(400).send("cannot create user");
+              });
+          } else {
+            // console.log("empty something");
+            response.status(400).send("empty string");
+          }
+        });
+    }
   }
 });
 
 app.post("/mentionsOfPhoto/:photo_id", function(request, response) {
-  let user = request.body.mentionUser;
-  let photo = request.params.photo_id;
-  // console.log("in mentions backend user", user);
-  // console.log("in mentions backend photo", photo);
+  if (request.session.login_name && request.session.user_id) {
+    let user = request.body.mentionUser;
+    let photo = request.params.photo_id;
+    // console.log("in mentions backend user", user);
+    // console.log("in mentions backend photo", photo);
 
-  User.findById(user, "mentions")
-    .then(user => {
-      console.log(user);
-      if (user.mentions.length) {
-        user.mentions = user.mentions.concat([photo]);
-      } else {
-        user.mentions = [photo];
-      }
-      user
-        .save()
-        .then(result => {
-          console.log("user saved", user);
-          response.status(200).send("mention saved");
-        })
-        .catch(err => response.status(400).send(JSON.stringify(err)));
-    })
-    .catch(err => response.status(400).send(JSON.stringify(err)));
+    User.findById(user, "mentions")
+      .then(user => {
+        console.log(user);
+        if (user.mentions.length) {
+          user.mentions = user.mentions.concat([photo]);
+        } else {
+          user.mentions = [photo];
+        }
+        user
+          .save()
+          .then(result => {
+            console.log("user saved", user);
+            response.status(200).send("mention saved");
+          })
+          .catch(err => response.status(400).send(JSON.stringify(err)));
+      })
+      .catch(err => response.status(400).send(JSON.stringify(err)));
+  }
 });
 
 app.get("/getPhoto/:photo_id", function(request, response) {
-  let photo_id = request.params.photo_id;
-  console.log("in mentions backend photo", photo_id);
+  if (request.session.login_name && request.session.user_id) {
+    let photo_id = request.params.photo_id;
+    console.log("in mentions backend photo", photo_id);
 
-  Photo.findById(photo_id, "file_name user_id")
-    .then(photo => {
-      photo = JSON.parse(JSON.stringify(photo));
-      User.findById(photo.user_id, "first_name last_name")
-        .then(user => {
-          photo.first_name = user.first_name;
-          photo.last_name = user.last_name;
-          console.log("PHOTO", photo);
-          response.status(200).send(JSON.stringify(photo));
-        })
-        .catch(err => {});
-    })
-    .catch(err => response.status(400).send(JSON.stringify(err)));
+    Photo.findById(photo_id, "file_name user_id")
+      .then(photo => {
+        photo = JSON.parse(JSON.stringify(photo));
+        User.findById(photo.user_id, "first_name last_name")
+          .then(user => {
+            photo.first_name = user.first_name;
+            photo.last_name = user.last_name;
+            console.log("PHOTO", photo);
+            response.status(200).send(JSON.stringify(photo));
+          })
+          .catch(err => {});
+      })
+      .catch(err => response.status(400).send(JSON.stringify(err)));
+  }
 });
 
 app.get("/getTopUserPhoto/:id", function(request, response) {

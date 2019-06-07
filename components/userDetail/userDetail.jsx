@@ -138,7 +138,7 @@ class UserDetail extends React.Component {
             <ListItemText primary={"Mentions: "} />
             <Mentions mentions={this.state.mentions} />
           </ListItem>
-          {Object.keys(this.state.topPhoto).length && (
+          {Object.keys(this.state.topPhoto).length ? (
             <ListItem>
               <ListItemText
                 primary={
@@ -158,14 +158,20 @@ class UserDetail extends React.Component {
                 />
               </HashLink>
             </ListItem>
+          ) : (
+            <ListItem>
+              <ListItemText primary={"No most recent photo"} />
+            </ListItem>
           )}
-          {Object.keys(this.state.topComment).length && (
+          {Object.keys(this.state.topComment).length ? (
             <ListItem>
               <ListItemText
                 primary={
-                  "Photo with most comments: " +
-                  this.state.topComment.comments.length +
-                  " comment(s)"
+                  Object.keys(this.state.topComment).length
+                    ? "Photo with most comments: " +
+                      this.state.topComment.comments.length +
+                      " comment(s)"
+                    : "No photo with most comments"
                 }
               />
               <HashLink to={"/photos/" + this.state.userObj._id}>
@@ -180,6 +186,11 @@ class UserDetail extends React.Component {
                   }}
                 />
               </HashLink>
+            </ListItem>
+          ) : (
+            <ListItem>
+              {" "}
+              <ListItemText primary="No photo with most comments" />
             </ListItem>
           )}
           <ListItem>

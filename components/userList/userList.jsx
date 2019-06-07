@@ -24,16 +24,7 @@ class UserList extends React.Component {
   }
 
   componentDidMount() {
-    this.props.changeMessage("Home");
-    axios.get("/user/list").then(
-      val => {
-        this.props.setUsers(val.data);
-        this.setState({ usersArray: val.data });
-      },
-      err => {
-        console.error("fetchModel error: ", err);
-      }
-    );
+    this.props.getUsers();
   }
 
   render() {
@@ -41,7 +32,7 @@ class UserList extends React.Component {
       <div>
         <Typography variant="title">List of Users</Typography>
         <List component="nav">
-          {this.state.usersArray.map(currUser => {
+          {this.props.users.map(currUser => {
             let link = "/users/" + currUser._id;
             return (
               <div key={currUser.first_name}>
